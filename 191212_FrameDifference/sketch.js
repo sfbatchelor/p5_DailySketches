@@ -1,10 +1,12 @@
-// https://kylemcdonald.github.io/cv-examples/
+//Edited from: https://kylemcdonald.github.io/cv-examples/
 
 var capture;
 var previousPixels;
-var w = 640;
-var h = 480;
+var w = 960;
+var h = 540;
 var recaptureBG = true;
+var canvasW = h*2; //portrait capture setup
+var canvasH = w;
 
 function setup() {
     capture = createCapture({
@@ -18,8 +20,8 @@ function setup() {
     });
     capture.elt.setAttribute('playsinline', '');
     capture.size(w, h);
-    createCanvas(w, h);
-    //capture.hide();
+    createCanvas(canvasW, canvasH);
+    capture.hide();
 }
 
 function copyImage(src, dst) {
@@ -42,7 +44,7 @@ function draw() {
                 h = capture.height;
             var i = 0;
             var pixels = capture.pixels;
-            var thresholdAmount = select('#thresholdAmount').value() * 255. / 100.;
+            var thresholdAmount = select('#thresholdAmount').value() * 255. / 300.;
             thresholdAmount *= 3; // 3 for r, g, b
             for (var y = 0; y < h; y++) {
                 for (var x = 0; x < w; x++) {
@@ -79,11 +81,24 @@ function draw() {
 
     select('#motion').elt.innerText = total;
     capture.updatePixels();
-    image(capture, 0, 0, 640, 480);
+    //draw diff-image
+    push();
+    translate(h, w);
+    rotate(radians(-90)); //rotate for portrait
+    image(capture, 0, 0, w, h);
+    pop();
+    //draw capture
+    push();
+    translate(0, w);
+    rotate(radians(-90)); //rotate for portrait
+    capture.loadPixels();
+    image(capture, 0, 0, w, h);
+    pop();
+
 }
 
 function keyTyped() {
-    if (key === ' ') {
+    if (key === 'x') {
         recaptureBG = true;
     }
 }
