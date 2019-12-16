@@ -180,7 +180,7 @@ function keyReleased() {
         h = hour();
         mi = minute();
         se = second();
-        save(y + '.' + m + '.' + d + '_' + h + '.' + mi + '.' + se + '.jpg');
+        save(y + '.' + m + '.' + d + '_' + h + '.' + mi + '.' + se + '.png');
     }
     if (key === 'R') {
         respawnBoids();
