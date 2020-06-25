@@ -131,9 +131,9 @@ class Boid {
 
         let a = noise((this.id + (frameCount * 40)) * this.freq);
         a = pow(a, 4)
-        let alpha = map(a, 0, 1, 1, 6);
+        let alpha = map(a, 0, 1, 100, 260);
         this.colour.setAlpha(alpha);
-        let numSamples = 300;
+        let numSamples = 3000;
         let circular = true;
         let e = 1;
         // render many translucent points around the central one

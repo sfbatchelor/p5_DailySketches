@@ -4,7 +4,7 @@ let alignmentSlider, cohesionSlider, separationSlider;
 let pause = true;
 
 function setup() {
-    createCanvas(1080, 1080, WEBGL);
+    createCanvas(1080*2, 1080*2, WEBGL);
     //ortho(-width, width, height, -height / 2, 0.1, 100);
     console.log('hello');
     video = createCapture(VIDEO);
