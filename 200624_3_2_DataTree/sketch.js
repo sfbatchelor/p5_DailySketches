@@ -4,9 +4,13 @@ let treeBase;
 let treeMax;
 let treeMin;
 let branchHeightStart;
+let branchXRange = 1200;
+let branchYRange = 1200;
 let maxLeaves = 20;
 let minLeaves = 1;
-let leafRange = 200;
+let leafRange = 500;
+let leafMaxWidth= 20;
+let leafMaxHeight = 20;
 //search
 var yearsBack = 50;
 var itr = 0;
@@ -16,6 +20,8 @@ var searchTerm = 'war';
 var termFrequencyData = new Map();
 var minFreq = 10000000000000;
 var maxFreq = 0;
+var totalFreq = 0.
+var avgFreq = 0.
 
 const map = (num, in_min, in_max, out_min, out_max) => {
   return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
@@ -31,7 +37,7 @@ for(var i = 0; i < yearsBack; i++)
 }
 
 async function setup() {
-    createCanvas(2000, 1000);
+    createCanvas(3000, 1000);
     console.log('hello');
     colorMode(HSB, 100);
     background(90);
@@ -40,7 +46,7 @@ async function setup() {
                 y : height,
             };
     treeMin = {
-        x: 100,
+        x: 600,
         y: height - 200
     };
     treeMax = {
@@ -73,10 +79,13 @@ function gotData(data)
         maxFreq = frequency;
     else if ( frequency < minFreq)
         minFreq = frequency;
+    totalFreq += frequency;
+    avgFreq = totalFreq/(itr+1.);
+
 
     console.log(termFrequencyData);
-    //console.log(minFreq);
-    //console.log(maxFreq);
+    console.log(minFreq);
+    console.log(maxFreq);
     var articles = data.response.docs;
     itr++;
  }
@@ -92,45 +101,73 @@ function draw() {
 
 function drawDataTree()
 {
+    var order = 1;
     for(let [key, value] of termFrequencyData)
     {
         // MAP: freq to Y, year to X 
         // find out where the branch end goes.
         //console.log(key + ' = ' + value)
 
+        //push away if close to average
         endY =  map(value, minFreq, maxFreq, treeMin.y, treeMax.y);
         endX = map(key, 2020 - yearsBack, 2020, treeMin.x, treeMax.x);
 
         //find out where the control points go
         c1 = {
             x: endX + 40,
-            y: endY +500
+            y: endY + 500
         };
         c2 = {
             x: treeBase.x,
-            y: treeMin.y - 200 
+            y: treeMin.y - 1500 
         };
 
         // draw branch
         noFill();
-        stroke(getBarkColour(key))
+        col = getBarkColour(key * i + 1.);
+        col.setAlpha(10);
+        stroke(col)
         bezier(endX, endY, c1.x, c1.y, c2.x, c2.y, treeBase.x, treeBase.y);
         bezier(width - endX, endY, width - c1.x, c1.y, width - c2.x, c2.y, width - treeBase.x, treeBase.y);
         //draw leaves
         numLeaves = map(value, minFreq, maxFreq, minLeaves, maxLeaves);
         for (var i = 0; i < numLeaves; i++) {
-            rx = noise(key*i) * leafRange;
-            rx = rx -leafRange/2.
-            ry = noise(key * i*rx) * leafRange;
-            ry = ry -leafRange/2
+            cw = noise(value * (i + 1.)) * leafMaxWidth * 1. + order / 6.;
+            ch = noise(value * (i + 1.*value)) * leafMaxHeight * 1. + order / 6.;
+
+            rx = noise(key * i) * leafRange;
+            rx = rx - leafRange / 2.
+            ry = noise(key * i * rx) * leafRange;
+            ry = ry - leafRange / 2
+
+            c1rx = noise(key*i) * branchXRange; 
+            c1rx = c1rx - branchXRange/2.;
+            c2rx = noise(key*i*c1rx) * branchXRange; 
+            c2rx = c2rx - branchXRange/2.;
+            c1ry = noise(key*i) * branchYRange; 
+            c1ry = c1ry - branchYRange/2.;
+            c2ry = noise(key*i*c1ry) * branchYRange; 
+            c2ry = c2ry - branchYRange/2.;
+
+
+
+            noFill();
+            col = getBarkColour(key*i+1.);
+            col.setAlpha(10);
+            stroke(col)
+            bezier(endX +rx, endY+ry, c1.x + c1rx, c1.y + c1ry, c2.x + c2rx, c2.y + c2ry, treeBase.x, treeBase.y);
+            bezier(width - endX -rx, endY +ry, width - c1.x - c1rx, c1.y + c1ry, width - c2.x - c2rx, c2.y +c2ry, width - treeBase.x, treeBase.y);
+ 
             fill(getLeafColour(endY, rx));
-            ellipse(endX + rx, endY+ry , 10, 10);
-            ellipse(width - endX - rx, endY+ry , 10, 10);
+            ellipse(endX + rx, endY + ry, cw, ch);
+            ellipse(width - endX - rx, endY + ry, cw, ch);
+   
         }
         //always have one on the tip
         fill(getLeafColour(endY, 1.));
-        ellipse(endX , endY , 10, 10);
-        ellipse(width - endX , endY , 10, 10);
+        ellipse(endX , endY , cw, ch);
+        ellipse(width - endX , endY , cw, ch);
+        order++;
     }
 }
 
