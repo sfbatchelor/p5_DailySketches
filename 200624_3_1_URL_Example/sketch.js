@@ -18,7 +18,7 @@ async function setup() {
     noCanvas();
     // START LOADING DATA AND SET TIME INTERVAL TO NOT GET LOCKED OUT
     await loadJSON(url[itr], gotData);
-    pullData = setInterval(function(){ loadURLs(); }, 6000);
+    pullData = setInterval(function(){ loadURLs(); }, 7000);
 }
 
 async function loadURLs()
