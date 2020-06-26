@@ -4,13 +4,16 @@ let treeBase;
 let treeMax;
 let treeMin;
 let branchHeightStart;
-let branchXRange = 1200;
-let branchYRange = 1200;
-let maxLeaves = 20;
+let branchXRange = 200;
+let branchYRange = 200;
+let maxLeaves = 50;
 let minLeaves = 1;
 let leafRange = 500;
-let leafMaxWidth= 20;
-let leafMaxHeight = 20;
+let leafMaxWidth= 30;
+let leafMaxHeight = 70;
+let maxWind = 200;
+let windFrequencyX = 0.0003;
+let windFrequencyY = 0.0001;
 //search
 var yearsBack = 50;
 var itr = 0;
@@ -122,121 +125,129 @@ function drawDataTree()
             y: treeMin.y - 1500 
         };
 
+        branchAlpha = 5;
+        leafAlpha = 10+ 50*constrain(order/(yearsBack/2),0., 1.); //bring alpha to 50% but have the outer be almost translucent
+        windXLeft = noise(windFrequencyX * millis() + endX) * maxWind;
+        windXLeft = windXLeft - maxWind / 2.;
+        windY = noise(windFrequencyY * millis() + endY) * maxWind;
+        windY = windY - maxWind / 2.;
+        windXRight = noise(windFrequencyX * millis() + width - endX) * maxWind;
+        windXRight = windXRight - maxWind / 2.;
+
+
         // draw branch
         noFill();
         col = getBarkColour(key * i + 1.);
-        col.setAlpha(10);
+        col.setAlpha(branchAlpha);
         stroke(col)
-        bezier(endX, endY, c1.x, c1.y, c2.x, c2.y, treeBase.x, treeBase.y);
-        bezier(width - endX, endY, width - c1.x, c1.y, width - c2.x, c2.y, width - treeBase.x, treeBase.y);
+        baseOffset = (c1.x - treeBase.x) / 20.;
+        baseOffset = noise(value * key) * baseOffset;
+
+       bezier(endX + windXLeft, endY + windY, c1.x, c1.y, c2.x, c2.y, treeBase.x - baseOffset, treeBase.y);
+       bezier(width - endX + windXRight, endY + windY, width - c1.x, c1.y, width - c2.x, c2.y, width - treeBase.x + baseOffset, treeBase.y);
         //draw leaves
         numLeaves = map(value, minFreq, maxFreq, minLeaves, maxLeaves);
         for (var i = 0; i < numLeaves; i++) {
             cw = noise(value * (i + 1.)) * leafMaxWidth * 1. + order / 6.;
-            ch = noise(value * (i + 1.*value)) * leafMaxHeight * 1. + order / 6.;
+            ch = noise(value * (i + 1. * value)) * leafMaxHeight * 1. + order / 6.;
 
             rx = noise(key * i) * leafRange;
             rx = rx - leafRange / 2.
             ry = noise(key * i * rx) * leafRange;
             ry = ry - leafRange / 2
 
-            c1rx = noise(key*i) * branchXRange; 
-            c1rx = c1rx - branchXRange/2.;
-            c2rx = noise(key*i*c1rx) * branchXRange; 
-            c2rx = c2rx - branchXRange/2.;
-            c1ry = noise(key*i) * branchYRange; 
-            c1ry = c1ry - branchYRange/2.;
-            c2ry = noise(key*i*c1ry) * branchYRange; 
-            c2ry = c2ry - branchYRange/2.;
+            c1rx = noise(key * i) * branchXRange;
+            c1rx = c1rx - branchXRange / 2.;
+            c2rx = noise(key * i * c1rx) * branchXRange;
+            c2rx = c2rx - branchXRange / 2.;
+            c1ry = noise(key * i) * branchYRange;
+            c1ry = c1ry - branchYRange / 2.;
+            c2ry = noise(key * i * c1ry) * branchYRange;
+            c2ry = c2ry - branchYRange / 2.;
 
 
 
             noFill();
-            col = getBarkColour(key*i+1.);
-            col.setAlpha(10);
+            col = getBarkColour(key * i + 1.);
+            col.setAlpha(branchAlpha);
             stroke(col)
-            bezier(endX +rx, endY+ry, c1.x + c1rx, c1.y + c1ry, c2.x + c2rx, c2.y + c2ry, treeBase.x, treeBase.y);
-            bezier(width - endX -rx, endY +ry, width - c1.x - c1rx, c1.y + c1ry, width - c2.x - c2rx, c2.y +c2ry, width - treeBase.x, treeBase.y);
- 
-            fill(getLeafColour(endY, rx));
-            ellipse(endX + rx, endY + ry, cw, ch);
-            ellipse(width - endX - rx, endY + ry, cw, ch);
-   
+            bezier(endX + rx + windXRight, endY + ry + windY, c1.x + c1rx, c1.y + c1ry, c2.x + c2rx, c2.y + c2ry, treeBase.x - baseOffset, treeBase.y);
+            bezier(width - endX - rx + windXLeft, endY + ry + windY, width - c1.x - c1rx, c1.y + c1ry, width - c2.x - c2rx, c2.y + c2ry, width - treeBase.x + baseOffset, treeBase.y);
+
+
+            col = getLeafColour(endY, rx);
+            col.setAlpha(leafAlpha);
+            fill(col);
+            ellipse(endX + rx + windXRight, endY + ry + windY, cw, ch);
+            ellipse(width - endX - rx + windXLeft, endY + ry + windY, cw, ch);
+
         }
         //always have one on the tip
-        fill(getLeafColour(endY, 1.));
-        ellipse(endX , endY , cw, ch);
-        ellipse(width - endX , endY , cw, ch);
+        col = getLeafColour(endY, 1.);
+        col.setAlpha(leafAlpha);
+        fill(col);
+        ellipse(endX + windXRight, endY + windY, cw, ch);
+        ellipse(width - endX + windXLeft, endY + windY, cw, ch);
         order++;
     }
 }
 
-function getLeafColour(posY, seed)
-{
+function getLeafColour(posY, seed) {
     colorMode(HSB, 100);
     rand = noise(seed);
-    let h,s,v;
+    let h, s, v;
     sunH = 70;
     sunS = 80;
     sunV = 80;
     shadowH = 180;
     shadowS = 27;
     shadowV = 17;
-   
-    factor = 1. - posY/height;
-    if(rand < .1)
-    {
+
+    factor = 1. - posY / height;
+    if (rand < .1) {
         h = 210.;
         s = 36;
         v = 35;
     }
-    else if(rand < .3)
-    {
+    else if (rand < .3) {
         h = 128.;
         s = 28;
         v = 24;
     }
-    else 
-    {
+    else {
         h = 92.;
         s = 51;
         v = 51;
     }
-    h = lerp(h,sunH, factor);
-    h += ((noise(seed)*3) - 3/2.);
-    s = lerp(s,sunS, factor);
-    s += ((noise(seed)*35) - 30.);
-    v = lerp(v,sunV, factor-.2);
-    v += ((noise(seed)*6) - 6/2.);
+    h = lerp(h, sunH, factor);
+    h += ((noise(seed) * 3) - 3 / 2.);
+    s = lerp(s, sunS, factor);
+    s += ((noise(seed) * 35) - 30.);
+    v = lerp(v, sunV, factor - .2);
+    v += ((noise(seed) * 6) - 6 / 2.);
     return color(h / 360. * 100, s, v);
 
 }
 
-function getBarkColour(seed)
-{
+function getBarkColour(seed) {
 
     colorMode(HSB, 100);
     rand = noise(seed);
-    if(rand < .1)
-    {
-        return color(26./360.*100,15,19);
+    if (rand < .1) {
+        return color(26. / 360. * 100, 15, 19);
     }
-    else if(rand < .3)
-    {
-        return color(0./360.*100,0,0);
+    else if (rand < .3) {
+        return color(0. / 360. * 100, 0, 0);
     }
-    else 
-    {
-        return color(42./360.*100,11,37);
+    else {
+        return color(42. / 360. * 100, 11, 37);
     }
 
 }
 
 
-function keyReleased()
-{
-    if(keyCode === ENTER)
-    {
+function keyReleased() {
+    if (keyCode === ENTER) {
         m = month();
         d = day();
         y = year();
