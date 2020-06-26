@@ -1,31 +1,22 @@
+// SET GLOBAL VARIABLES
+var yearsBack = 50;
 var itr = 0;
 var key = 'dsmqvW3GMsp2GJ4mho31MPjGJxxGNdD2';
 var searchTerm = 'election';
-var url =[
- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2000) + '")&api-key=' + key,
- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2001) + '")&api-key=' + key,
- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2002) + '")&api-key=' + key,
- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2003) + '")&api-key=' + key,
- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2004) + '")&api-key=' + key,
- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2005) + '")&api-key=' + key,
- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2006) + '")&api-key=' + key,
- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2007) + '")&api-key=' + key,
- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2008) + '")&api-key=' + key,
- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2009) + '")&api-key=' + key,
- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2010) + '")&api-key=' + key,
- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2011) + '")&api-key=' + key,
- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2012) + '")&api-key=' + key,
- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2013) + '")&api-key=' + key,
- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2014) + '")&api-key=' + key,
- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2015) + '")&api-key=' + key,
- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2016) + '")&api-key=' + key,
- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2017) + '")&api-key=' + key,
- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2018) + '")&api-key=' + key,
- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2019) + '")&api-key=' + key,
-]
+
+// SET URLs BASED ON INPUTS
+var url =[];
+for(var i = 0; i < yearsBack; i++)
+{
+    url.unshift( 
+    'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2019 - i) + '")&api-key=' + key);
+
+}
+//console.log(url);
 
 async function setup() {
     noCanvas();
+    // START LOADING DATA AND SET TIME INTERVAL TO NOT GET LOCKED OUT
     await loadJSON(url[itr], gotData);
     pullData = setInterval(function(){ loadURLs(); }, 6000);
 }
@@ -41,7 +32,7 @@ function gotData(data)
     //console.log(url);
     //console.log(data);
     var frequency = data.response.meta.hits;
-    console.log("'"+ searchTerm + "' in year " +  (2000+itr) +": " + frequency);
+    console.log("'" + searchTerm + "' in year " + (2020 - yearsBack + itr) + ": " + frequency);
     var articles = data.response.docs;
     for(var i = 0; i < articles.length; i++)
     {
