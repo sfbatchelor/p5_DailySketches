@@ -4,13 +4,13 @@ let treeBase;
 let treeMax;
 let treeMin;
 let branchHeightStart;
-let branchXRange = 200;
-let branchYRange = 200;
-let maxLeaves = 50;
+let branchXRange = 300;
+let branchYRange = 100;
+let maxLeaves = 10;
 let minLeaves = 1;
-let leafRange = 500;
-let leafMaxWidth= 30;
-let leafMaxHeight = 70;
+let leafRange = 200;
+let leafMaxWidth= 20;
+let leafMaxHeight = 20;
 let maxWind = 200;
 let windFrequencyX = 0.0003;
 let windFrequencyY = 0.0001;
@@ -32,29 +32,32 @@ const map = (num, in_min, in_max, out_min, out_max) => {
 
 // SET URLs BASED ON INPUTS
 var url =[];
-for(var i = 0; i < yearsBack; i++)
-{
-    url.unshift( 
-    'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2019 - i) + '")&api-key=' + key);
+function genURLs(){
 
+    for (var i = 0; i < yearsBack; i++) {
+        url.unshift(
+            'https://api.nytimes.com/svc/search/v2/articlesearch.json?fq=' + searchTerm + ' AND pub_year:("' + (2019 - i) + '")&api-key=dsmqvW3GMsp2GJ4mho31MPjGJxxGNdD2');
+
+    }
 }
+genURLs();
 
 async function setup() {
-    createCanvas(3000, 1000);
+    createCanvas(2000, 1000);
     console.log('hello');
     colorMode(HSB, 100);
     background(90);
     treeBase  = {
                 x :  width/2.,
-                y : height,
+                y : height - 120,
             };
     treeMin = {
-        x: 600,
-        y: height - 200
+        x: 100,
+        y: height - 300
     };
     treeMax = {
         x: width/2 ,
-        y: 200
+        y: 160
     };
 
 
@@ -100,14 +103,80 @@ function draw() {
     drawDataTree();
     if (itr + 1 > url.length)
         clearInterval(pullData);
+
+    // OVERLAYS
+    // search term
+    textSize(width / 65);
+    fill(20);
+    noStroke();
+    textAlign(CENTER, CENTER);
+    textFont('Times New Roman');
+    textStyle(ITALIC);
+    text("\" " + searchTerm + " \"", width / 2., height - 40);
+    //years on bottom
+    for (let [key, value] of termFrequencyData) {
+        textSize(width / 175);
+        xpos = map(key, 2020 - yearsBack, 2020, treeMin.x, treeMax.x);
+        ellipse(xpos, height -95, 3, 3);
+        text(key, xpos, height - 80);
+        xpos = width - xpos;
+        ellipse(xpos, height -95, 3, 3);
+        text(key, xpos, height - 80);
+    }
+    // values on side
+    ypos = map(maxFreq, minFreq, maxFreq, treeMin.y, treeMax.y);
+    push();
+    translate(30, ypos);
+    rotate(PI / 2.);
+    text(maxFreq, 0, 0);
+    pop();
+    push();
+    translate(width - 30, ypos);
+    rotate(-PI / 2.);
+    text(maxFreq, 0, 0);
+    pop();
+    ypos = map(minFreq, minFreq, maxFreq, treeMin.y, treeMax.y);
+    push();
+    translate(30, ypos);
+    rotate(PI / 2.);
+    text(minFreq, 0, 0);
+    pop();
+    push();
+    translate(width - 30, ypos);
+    rotate(-PI / 2.);
+    text(minFreq, 0, 0);
+    pop();
+
+    //corner dashes
+    push();
+    translate(20, 20);
+    stroke(0);
+    line(-5, 0, 5, 0);
+    pop();
+
+    push();
+    translate(width - 20, 20);
+    stroke(0);
+    line(-5, 0, 5, 0);
+    pop();
+
+    push();
+    translate(width - 20, height - 20);
+    stroke(0);
+    line(-5, 0, 5, 0);
+    pop();
+
+    push();
+    translate(20, height - 20);
+    stroke(0);
+    line(-5, 0, 5, 0);
+    pop();
 }
 
-function drawDataTree()
-{
+function drawDataTree() {
     var order = 1;
-    for(let [key, value] of termFrequencyData)
-    {
-        // MAP: freq to Y, year to X 
+    for (let [key, value] of termFrequencyData) {
+        // MAP: freq to Y, year to X
         // find out where the branch end goes.
         //console.log(key + ' = ' + value)
 
@@ -125,8 +194,8 @@ function drawDataTree()
             y: treeMin.y - 1500 
         };
 
-        branchAlpha = 5;
-        leafAlpha = 10+ 50*constrain(order/(yearsBack/2),0., 1.); //bring alpha to 50% but have the outer be almost translucent
+        branchAlpha = 15;
+        leafAlpha = 70+ 50*constrain(order/(yearsBack/2),0., 1.); //bring alpha to 50% but have the outer be almost translucent
         windXLeft = noise(windFrequencyX * millis() + endX) * maxWind;
         windXLeft = windXLeft - maxWind / 2.;
         windY = noise(windFrequencyY * millis() + endY) * maxWind;
@@ -143,8 +212,8 @@ function drawDataTree()
         baseOffset = (c1.x - treeBase.x) / 20.;
         baseOffset = noise(value * key) * baseOffset;
 
-       bezier(endX + windXLeft, endY + windY, c1.x, c1.y, c2.x, c2.y, treeBase.x - baseOffset, treeBase.y);
-       bezier(width - endX + windXRight, endY + windY, width - c1.x, c1.y, width - c2.x, c2.y, width - treeBase.x + baseOffset, treeBase.y);
+        bezier(endX + windXLeft, endY + windY, c1.x, c1.y, c2.x, c2.y, treeBase.x - baseOffset, treeBase.y);
+        bezier(width - endX + windXRight, endY + windY, width - c1.x, c1.y, width - c2.x, c2.y, width - treeBase.x + baseOffset, treeBase.y);
         //draw leaves
         numLeaves = map(value, minFreq, maxFreq, minLeaves, maxLeaves);
         for (var i = 0; i < numLeaves; i++) {
@@ -152,8 +221,10 @@ function drawDataTree()
             ch = noise(value * (i + 1. * value)) * leafMaxHeight * 1. + order / 6.;
 
             rx = noise(key * i) * leafRange;
+            rx += noise(key * i * rx*value) * leafRange/6.;;
             rx = rx - leafRange / 2.
             ry = noise(key * i * rx) * leafRange;
+            ry += noise(key * i * ry*value) * leafRange/6.;;
             ry = ry - leafRange / 2
 
             c1rx = noise(key * i) * branchXRange;
@@ -246,8 +317,8 @@ function getBarkColour(seed) {
 }
 
 
-function keyReleased() {
-    if (keyCode === ENTER) {
+async function keyReleased() {
+    if (key === 'x') {
         m = month();
         d = day();
         y = year();
@@ -256,9 +327,28 @@ function keyReleased() {
         se = second();
         save(y + '.' + m + '.' + d + '_' + h + '.' + mi + '.' + se + '.jpg');
     }
-    else if (key === ' ') {
-        background(90);
-    }
+    else if(keyCode === RETURN)
+     {
+        await clearInterval(pullData);
+        termFrequencyData.clear();
+        minFreq = 10000000000000;
+        maxFreq = 0;
+        totalFreq = 0.
+        avgFreq = 0
+        itr = 0;
+        genURLs();
+        await loadJSON(url[itr], gotData);
+        pullData = setInterval(function () { loadURLs(); }, 7000)
+
+
+     }
+     else if( keyCode === BACKSPACE )
+     {
+         searchTerm = searchTerm.substring(0, searchTerm.length - 1);
+     }
+     else{
+         searchTerm += key;
+     }
 
     return false; //need to ahve this for some browsers
 }
