@@ -15,7 +15,7 @@ let maxWind = 200;
 let windFrequencyX = 0.0003;
 let windFrequencyY = 0.0001;
 //search
-var yearsBack = 50;
+var yearsBack = 30;
 var itr = 0;
 var key = 'dsmqvW3GMsp2GJ4mho31MPjGJxxGNdD2';
 var searchTerm = 'war';
