@@ -2,7 +2,7 @@
 //--- REQUEST
 var key = 'DuMOS0sz2RObRmr8huQakm4SJfCg9qfQeS8LuZEtIwk';
 var searchTerm = 'design';
-var pages = 1;
+var pages = 9;
 var currentPage = 0;
 var url;
 //--- RECEIVED DATA
@@ -336,7 +336,7 @@ Circle.prototype.show = function () {
     ellipse(this.x, this.y, this.r * 2, this.r * 2, 50);
     // draw outline
     noFill();
-    strokeWeight(7.5);
+    strokeWeight(3.5);
     outlineAlpha = map(alpha, -1, 1, 20, 100);
     if (this.id === 0) //have central circle hang around longer
         stroke(255, 0, 175, 100);
