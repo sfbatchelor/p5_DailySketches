@@ -1,8 +1,8 @@
 ////// SET GLOBAL VARIABLES //////
 //--- REQUEST
 var key = 'DuMOS0sz2RObRmr8huQakm4SJfCg9qfQeS8LuZEtIwk';
-var searchTerm = 'flag';
-var pages = 5;
+var searchTerm = 'design';
+var pages = 9;
 var currentPage = 0;
 var url;
 //--- RECEIVED DATA
@@ -12,6 +12,7 @@ var croppedUrl = [] ;	// url for cropped images
 
 // Circles 
 var circles = [];
+var maxCircles = 3800;
 
 // Font
 var font;
@@ -51,27 +52,44 @@ function gotData(data) {
 
 //// SETUP: Function called to setup the canvas we draw graphics on and set startup variables
 function setup() {
+
     createCanvas(2000, 2180, WEBGL);
+    frameRate(30);
+
+
     for (let i = 0; i < img.length; i++) {
         let newW = width / 4 - (10 * 4);
         console.log("Resizeing " + i);
         img[i].resize(newW, 0);
     }
 
-    circles.push(new Circle(0, 0., min(width, height) / 4.));
+    circles.push(new Circle(0, 0., min(width, height) / 6.));
 
 }
 
 //// DRAW: The draw loop that is called every frame.
 function draw() {
     background(50);
-    drawCircles();
+
+    push();
+    rotate(frameCount*0.0007);
+    scale(1.4);
+    if (circles.length < maxCircles)
+        makeAndDrawCircles();
+    else {
+        for (var i = 0; i < circles.length; i++) {
+            var c = circles[i];
+            c.show();
+        }
+    }
+    pop();
+
     drawOverlays();
 
 }
 
 //// DRAW CIRCLES: Encapsulates where and how the circles are drawn.
-function drawCircles() {
+function makeAndDrawCircles() {
 
 
     // All the circles
@@ -102,7 +120,7 @@ function drawCircles() {
 
     // Let's try to make a certain number of new circles each frame
     // More later
-    var target = 1 + constrain(floor(frameCount / 120), 0, 20);
+    var target = 1 + constrain(floor(frameCount / 30), 0, 120);
     // How many
     var count = 0;
     // Try N times
@@ -126,7 +144,7 @@ function drawCircles() {
 function drawOverlays() {
 
 
-    fontSize = 240;
+    fontSize = 150;
     textSize(fontSize);
     charWidth = textSize()/1.66;
     charHeight = textSize()/.8
@@ -134,10 +152,10 @@ function drawOverlays() {
     // draw black fill behind text
     push();
     translate(width / 2. - 200, -height / 2. + 200);
-    translate(-10, -170, 1.); //add a z - component because we are in WEBGL mode so text draws ontop of graphics
+    translate(-10, -110, 1.); //add a z - component because we are in WEBGL mode so text draws ontop of graphics
     fill(0);
     noStroke();
-    rect(0, 0, charWidth + 20, 200);
+    rect(0, 0, charWidth + 20, 130);
     //draw num pages
     pop();
     push();
@@ -148,13 +166,24 @@ function drawOverlays() {
     pop();
 
     //draw fill behind text
-    for (var i = 0; i < searchTerm.length; i++) {
+    for (var i = 0; i < searchTerm.length + 3; i++) {
         push();
         translate(- width / 2., height / 2. - charHeight);
-        translate(30, -50, 1.); //add a z - component because we are in WEBGL mode so text draws ontop of graphics
+        translate(55, -75, 1.); //add a z - component because we are in WEBGL mode so text draws ontop of graphics
         translate(i * charWidth, 0);
         fill(0);
         noStroke();
+        if (i === searchTerm.length + 3 - 1) //if it's the last
+        {
+            if(sin(frameCount*.2) > 0)
+            {
+                fill(0,0,0,0);// transluscent
+            }
+            else{
+                fill(255, 0, 175);//magenta
+            }
+
+        }
         rect(0, 0, charWidth, charHeight);
         pop();
     }
@@ -163,9 +192,9 @@ function drawOverlays() {
     textFont(font);
     push();
     translate(- width/2., height/2.);
-    translate(30,  - 130, 2. ); //add a z - component because we are in WEBGL mode so text draws ontop of graphics
+    translate(55,  - 130, 2. ); //add a z - component because we are in WEBGL mode so text draws ontop of graphics
     fill(255, 0, 175 );
-    text(searchTerm, 0, 0);
+    text('//' + searchTerm, 0, 0);
     pop();
 
 }
@@ -181,7 +210,7 @@ function keyReleased() {
         imgUrl = [];		// url for images
         croppedUrl = [];	// url for cropped images
         circles = [];
-        circles.push(new Circle(0, 0., min(width, height) / 4.));
+        circles.push(new Circle(0, 0., min(width, height) / 6.));
         loadImages();
 
     }
@@ -214,7 +243,7 @@ function keyReleased() {
             pages = 9;
     }
     else {
-        if (searchTerm.length < 13)
+        if (searchTerm.length < 18)
             searchTerm += key;
     }
 
@@ -252,6 +281,7 @@ function Circle(x, y, r) {
   this.y = y;
   this.r = r;
   this.num = int(random(0, img.length -1));
+  this.id = circles.length;
 }
 
 // Check stuck to an edges
@@ -261,7 +291,7 @@ Circle.prototype.edges = function() {
 
 // Grow
 Circle.prototype.grow = function () {
-    this.r += 3.9;
+    this.r += 0.3;
 }
 
 // New Texture
@@ -272,16 +302,54 @@ Circle.prototype.newTexture = function() {
 // Show
 Circle.prototype.show = function () {
 
-    fill(255, 0, 175, 10);
-    if(img[this.num])
+ 
+    //calc alphas
+    alpha = sin((frameCount + this.id * 2000) * 0.02);
+    alpha *= sin((frameCount + this.id * 1894) * 0.01);
+    let maskAlpha;
+    if (this.id === 0) //have central circle hang around longer
+    {
+        alpha = sin((frameCount + this.id * 2000) * 0.02);
+        maskAlpha = map(alpha, -1, 1, -.5, 2);
+        if (maskAlpha <= -0.25) {
+            this.num = int(random(0, img.length - 1));
+        }
+        maskAlpha = 1 - maskAlpha;
+        maskAlpha = pow(maskAlpha, 7);
+    }
+    else {
+        maskAlpha = map(alpha, -1, 1, 2, -5);
+        maskAlpha = 1 - maskAlpha;
+        maskAlpha = pow(maskAlpha, 4);
+    }
+
+
+   // draw image texture
+    push();
+    fill(255);
+    if (img[this.num])
     {
         texture(img[this.num]);
     }
+    if(this.id ===0)
+    {
+        rotate(-frameCount * 0.0007);
+    }
     ellipse(this.x, this.y, this.r * 2, this.r * 2, 50);
+    //draw mask
+    noStroke();
+    fill(50, (maskAlpha * 200));
+    ellipse(this.x, this.y, this.r * 2, this.r * 2, 50);
+    // draw outline
     noFill();
-    strokeWeight(2.5);
-    stroke(255, 0, 175);
+    strokeWeight(3.5);
+    outlineAlpha = map(alpha, -1, 1, -100, 200);
+    if (this.id === 0) //have central circle hang around longer
+        stroke(255, 0, 175, 100);
+    else
+        stroke(255, 0, 175, outlineAlpha);
     ellipse(this.x, this.y, this.r * 2, this.r * 2, 50);
-    fill(50, 50, 50, 10);
-    ellipse(this.x, this.y, this.r * 2, this.r * 2, 50);
+    pop();
+
+
 }

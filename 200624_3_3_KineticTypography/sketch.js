@@ -127,8 +127,7 @@ function draw() {
     }
 
     //ABSTRACT READER OVERLAY
-    if(mouseX >= 20 && mouseX <= width-20 && mouseY >= 20 && mouseY <=height-20)
-    {
+    if (mouseX >= 20 && mouseX <= width - 20 && mouseY >= 20 && mouseY <= height - 20) {
         readerWidth = 450;
         readerHeight = 200;
         sx = mouseX - readerWidth / 2.;
@@ -190,7 +189,7 @@ function draw() {
 }
 
 
-function createSliders(){
+function createSliders() {
   tX = createSlider(1, 80, 66, 1);
   tX.position(20, height + 40);
   createP('Tiles X').position(20, height);
