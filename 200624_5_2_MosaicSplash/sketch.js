@@ -2,7 +2,7 @@
 //--- REQUEST
 var key = 'DuMOS0sz2RObRmr8huQakm4SJfCg9qfQeS8LuZEtIwk';
 var searchTerm = 'design';
-var pages = 9;
+var pages = 1;
 var currentPage = 0;
 var url;
 //--- RECEIVED DATA
@@ -291,7 +291,7 @@ Circle.prototype.edges = function() {
 
 // Grow
 Circle.prototype.grow = function () {
-    this.r += 0.3;
+    this.r += 3.3;
 }
 
 // New Texture
@@ -309,18 +309,12 @@ Circle.prototype.show = function () {
     let maskAlpha;
     if (this.id === 0) //have central circle hang around longer
     {
-        alpha = sin((frameCount + this.id * 2000) * 0.02);
-        maskAlpha = map(alpha, -1, 1, -.5, 2);
-        if (maskAlpha <= -0.25) {
-            this.num = int(random(0, img.length - 1));
-        }
-        maskAlpha = 1 - maskAlpha;
-        maskAlpha = pow(maskAlpha, 7);
+        maskAlpha = 0.;
     }
     else {
-        maskAlpha = map(alpha, -1, 1, 2, -5);
+        maskAlpha = map(alpha, -1, 1, 1, -.3);
         maskAlpha = 1 - maskAlpha;
-        maskAlpha = pow(maskAlpha, 4);
+        maskAlpha = pow(maskAlpha, 2);
     }
 
 
@@ -342,8 +336,8 @@ Circle.prototype.show = function () {
     ellipse(this.x, this.y, this.r * 2, this.r * 2, 50);
     // draw outline
     noFill();
-    strokeWeight(3.5);
-    outlineAlpha = map(alpha, -1, 1, -100, 200);
+    strokeWeight(7.5);
+    outlineAlpha = map(alpha, -1, 1, 20, 100);
     if (this.id === 0) //have central circle hang around longer
         stroke(255, 0, 175, 100);
     else
